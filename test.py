@@ -5,7 +5,7 @@
 import os
 import time
 import numpy as np
-from sklearn.neighbors import KDTree
+# from sklearn.neighbors import KDTree # 삭제는 쫄려서 주석 처리
 from scipy.spatial.distance import cdist
 
 # pytorch, torch vision
@@ -29,7 +29,7 @@ def main():
 
     # Parse options
     args = Options().parse()
-    print("Parameters:\t" + str(args))
+    # print("Parameters:\t" + str(args))
 
     args.test = True
     if args.filter_sketch:
@@ -72,8 +72,8 @@ def main():
         files_semantic_labels.append(fi)
         sem_dim += list(np.load(fi, allow_pickle=True).item().values())[0].shape[0]
 
-    print("Checkpoint path: {}".format(path_cp))
-    print("Result path: {}".format(path_results))
+    # print("Checkpoint path: {}".format(path_cp))
+    # print("Result path: {}".format(path_results))
 
     # Parameters for transforming the images
     transform_image = transforms.Compose(
@@ -84,7 +84,7 @@ def main():
     )
 
     # Load the dataset
-    print("Loading data...", end="")
+    # print("Loading data...", end="")
 
     if args.dataset == "Sketchy":
         if ds_var == "extended":
@@ -194,7 +194,7 @@ def main():
         splits["te_clss_im"],
         transforms=transform_image,
     )
-    print("Done")
+    # print("Done")
 
     # PyTorch test loader for sketch
     test_loader_sketch = DataLoader(
@@ -250,48 +250,48 @@ def main():
 
     cudnn.benchmark = True
 
-    # Check cuda
-    print("Checking cuda...", end="")
-    # Check if CUDA is enabled
-    if args.ngpu > 0 & torch.cuda.is_available():
-        print("*Cuda exists*...", end="")
-        sem_pcyc_model = sem_pcyc_model.cuda()
-    print("Done")
+    # # Check cuda
+    # print("Checking cuda...", end="")
+    # # Check if CUDA is enabled
+    # if args.ngpu > 0 & torch.cuda.is_available():
+    #     print("*Cuda exists*...", end="")
+    #     sem_pcyc_model = sem_pcyc_model.cuda()
+    # print("Done")
 
     # load the best model yet
     best_model_file = os.path.join(path_cp, "model_best.pth")
     if os.path.isfile(best_model_file):
-        print("Loading best model from '{}'".format(best_model_file))
+        # print("Loading best model from '{}'".format(best_model_file))
         checkpoint = torch.load(best_model_file, map_location=torch.device("cpu"))
         epoch = checkpoint["epoch"]
         best_map = checkpoint["best_map"]
         sem_pcyc_model.load_state_dict(checkpoint["state_dict"])
-        print(
-            "Loaded best model '{0}' (epoch {1}; mAP@all {2:.4f})".format(
-                best_model_file, epoch, best_map
-            )
-        )
-        print("***Test***")
+        # print(
+        #     "Loaded best model '{0}' (epoch {1}; mAP@all {2:.4f})".format(
+        #         best_model_file, epoch, best_map
+        #     )
+        # )
+        # print("***Test***")
         valid_data = validate(
             test_loader_sketch, test_loader_image, sem_pcyc_model, epoch, args
         )
-        print(
-            "Results on test set: mAP@all = {1:.4f}, Prec@100 = {0:.4f}, mAP@200 = {3:.4f}, Prec@200 = {2:.4f}, "
-            "Time = {4:.6f} || mAP@all (binary) = {6:.4f}, Prec@100 (binary) = {5:.4f}, mAP@200 (binary) = {8:.4f}, "
-            "Prec@200 (binary) = {7:.4f}, Time (binary) = {9:.6f} ".format(
-                valid_data["prec@100"],
-                np.mean(valid_data["aps@all"]),
-                valid_data["prec@200"],
-                np.mean(valid_data["aps@200"]),
-                valid_data["time_euc"],
-                valid_data["prec@100_bin"],
-                np.mean(valid_data["aps@all_bin"]),
-                valid_data["prec@200_bin"],
-                np.mean(valid_data["aps@200_bin"]),
-                valid_data["time_bin"],
-            )
-        )
-        print("Saving qualitative results...", end="")
+        # print(
+        #     "Results on test set: mAP@all = {1:.4f}, Prec@100 = {0:.4f}, mAP@200 = {3:.4f}, Prec@200 = {2:.4f}, "
+        #     "Time = {4:.6f} || mAP@all (binary) = {6:.4f}, Prec@100 (binary) = {5:.4f}, mAP@200 (binary) = {8:.4f}, "
+        #     "Prec@200 (binary) = {7:.4f}, Time (binary) = {9:.6f} ".format(
+        #         valid_data["prec@100"],
+        #         np.mean(valid_data["aps@all"]),
+        #         valid_data["prec@200"],
+        #         np.mean(valid_data["aps@200"]),
+        #         valid_data["time_euc"],
+        #         valid_data["prec@100_bin"],
+        #         np.mean(valid_data["aps@all_bin"]),
+        #         valid_data["prec@200_bin"],
+        #         np.mean(valid_data["aps@200_bin"]),
+        #         valid_data["time_bin"],
+        #     )
+        # )
+        # print("Saving qualitative results...", end="")
         path_qualitative_results = os.path.join(path_results, "qualitative_results")
         utils.save_qualitative_results(
             root_path,
@@ -309,10 +309,10 @@ def main():
             nq=args.number_qualit_results,
             best=args.save_best_results,
         )
-        print("Done")
-    else:
-        print("No best model found at '{}'. Exiting...".format(best_model_file))
-        exit()
+        # print("Done")
+    # else:
+    #     print("No best model found at '{}'. Exiting...".format(best_model_file))
+    #     exit()
 
 
 def validate(valid_loader_sketch, valid_loader_image, sem_pcyc_model, epoch, args):
@@ -346,13 +346,13 @@ def validate(valid_loader_sketch, valid_loader_image, sem_pcyc_model, epoch, arg
         batch_time.update(time_end - time_start)
         time_start = time_end
 
-        if (i + 1) % args.log_interval == 0:
-            print(
-                "[Test][Sketch] Epoch: [{0}][{1}/{2}]\t"
-                "Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t".format(
-                    epoch + 1, i + 1, len(valid_loader_sketch), batch_time=batch_time
-                )
-            )
+        # if (i + 1) % args.log_interval == 0:
+        #     print(
+        #         "[Test][Sketch] Epoch: [{0}][{1}/{2}]\t"
+        #         "Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t".format(
+        #             epoch + 1, i + 1, len(valid_loader_sketch), batch_time=batch_time
+        #         )
+        #     )
 
     for i, (im, cls_im) in enumerate(valid_loader_image):
 
@@ -370,21 +370,21 @@ def validate(valid_loader_sketch, valid_loader_image, sem_pcyc_model, epoch, arg
             acc_im_em = np.concatenate((acc_im_em, im_em.cpu().data.numpy()), axis=0)
             acc_cls_im = np.concatenate((acc_cls_im, cls_im), axis=0)
 
-        # time
-        time_end = time.time()
-        batch_time.update(time_end - time_start)
-        time_start = time_end
+        # # time
+        # time_end = time.time()
+        # batch_time.update(time_end - time_start)
+        # time_start = time_end
 
-        if (i + 1) % args.log_interval == 0:
-            print(
-                "[Test][Image] Epoch: [{0}][{1}/{2}]\t"
-                "Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t".format(
-                    epoch + 1, i + 1, len(valid_loader_image), batch_time=batch_time
-                )
-            )
+        # if (i + 1) % args.log_interval == 0:
+        #     print(
+        #         "[Test][Image] Epoch: [{0}][{1}/{2}]\t"
+        #         "Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t".format(
+        #             epoch + 1, i + 1, len(valid_loader_image), batch_time=batch_time
+        #         )
+        #     )
 
-    # Compute mAP
-    print("Computing evaluation metrics...", end="")
+    # # Compute mAP
+    # print("Computing evaluation metrics...", end="")
 
     # Compute similarity
     t = time.time()
@@ -429,7 +429,7 @@ def validate(valid_loader_sketch, valid_loader_image, sem_pcyc_model, epoch, arg
         "str_sim": str_sim,
     }
 
-    print("Done")
+    # print("Done")
 
     return valid_data
 
